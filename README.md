@@ -32,12 +32,6 @@
   2. **Embeddings** — 100K prompts encoded with `all-MiniLM-L6-v2` (384-dim sentence embeddings)
   3. **Clustering** — PCA (384 → 50 dims) + KMeans (k=10), visualized via PCA 2D projection
 
-  ## Sample Visualizations
-
-  | Prompt Length Distribution | Cluster Scatter Plot |
-  |---|---|
-  | ![](data/prompt_length_dist.png) | ![](data/clusters_scatter.png) |
-
   ## Notebooks                                                                                                                                                                                                                                                                                                      
                                                                                                                                                                                                                                                                                                                     
   The analysis consists of two parts:
