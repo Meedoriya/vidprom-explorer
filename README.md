@@ -53,20 +53,7 @@ Pre-computes all statistics and cluster summaries into JSON files so the API can
 
 [03_prepare_api_data.ipynb](notebooks/03_prepare_api_data.ipynb)
 
-### 4. FastAPI Service
-REST API that serves the analysis results and can classify new prompts in real time.
-
-```
-GET  /stats/overview          — dataset statistics
-GET  /stats/top-words         — most frequent words (with limit param)
-GET  /clusters                — list of 10 thematic clusters
-GET  /clusters/{id}           — cluster details with sample prompts
-POST /analyze                 — classify any prompt into a cluster
-```
-
----
-
-## Sample Visualizations
+## Visualizations
 
 | Prompt Length Distribution | Temporal Patterns |
 |---|---|
@@ -77,60 +64,6 @@ POST /analyze                 — classify any prompt into a cluster
 | ![](img/nsfw_analysis.png) | ![](img/clusters_scatter.png) |
 
 ---
-
-## Quick Start
-
-```bash
-git clone https://github.com/yourusername/vidprom-explorer.git
-cd vidprom-explorer
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-Download the dataset:
-```bash
-python scripts/download_data.py
-```
-
-Run the notebooks in order (`01_eda` -> `02_clustering` -> `03_prepare_api_data`), then start the API:
-```bash
-uvicorn app.main:app --reload
-```
-
-Open `http://127.0.0.1:8000/docs` for interactive Swagger documentation.
-
----
-
-## Project Structure
-
-```
-vidprom-explorer/
-├── notebooks/
-│   ├── 01_eda.ipynb                # Exploratory data analysis
-│   ├── 02_clustering.ipynb         # Embeddings + KMeans clustering
-│   └── 03_prepare_api_data.ipynb   # Pre-compute data for API
-├── app/
-│   ├── main.py                     # FastAPI application
-│   ├── data_loader.py              # Data loading (lifespan)
-│   ├── schemas.py                  # Pydantic response models
-│   └── routers/
-│       ├── stats.py                # /stats/* endpoints
-│       ├── clusters.py             # /clusters/* endpoints
-│       └── analyze.py              # POST /analyze endpoint
-├── scripts/
-│   └── download_data.py
-├── models/                         # Saved PCA + KMeans models
-├── data/                           # Dataset + pre-computed JSONs
-└── requirements.txt
-```
-
-## Tools & Libraries
-
-- **Data:** pandas, numpy
-- **Visualization:** matplotlib, seaborn, wordcloud
-- **NLP:** sentence-transformers ([all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2))
-- **ML:** scikit-learn (PCA, KMeans)
-- **API:** FastAPI, Pydantic, uvicorn
 
 ## References
 
