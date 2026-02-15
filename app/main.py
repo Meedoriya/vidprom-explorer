@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.data_loader import app_data
-from app.routers import clusters, stats
+from app.routers import clusters, stats, analyze
 
 
 @asynccontextmanager
@@ -15,6 +15,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="VidProM Explorer API", lifespan=lifespan)
 app.include_router(stats.router)
 app.include_router(clusters.router)
+app.include_router(analyze.router)
 
 
 @app.get("/")

@@ -1,62 +1,138 @@
- # VidProM Explorer: What Do People Ask Video AI to Generate?                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                                  
-  Exploratory data analysis and clustering of **1.67M video generation prompts** from the [VidProM](https://huggingface.co/datasets/WenhaoWang/VidProM) dataset.                                                                                                                                                    
-                                                                                                                                                                                                                                                                                                                    
-  ## Motivation
+# What Do People Ask Video AI to Generate?
 
-  Text-to-video AI models (Sora, Runway, Pika) are rapidly growing, but little is known about *what* people actually ask them to generate. This project analyzes real user prompts to uncover patterns, themes, and content trends in video generation.
+<p align="center">
+  <img src="img/clusters_scatter.png" width="600">
+</p>
 
-  ## Key Findings
+People are generating millions of videos with AI tools like Sora, Runway, and Pika — but what exactly are they asking for? This project digs into **1.67 million real user prompts** from the [VidProM](https://vidprom.github.io/) dataset to find out.
 
-  - **Prompt length:** median 68 characters / 11 words — most prompts are concise scene descriptions
-  - **Time span:** 248 days (Jun 2023 — Mar 2024), covering the early adoption period of video AI
-  - **Content safety:** 98% of prompts are clean; only 1.89% have toxicity > 0.5
-  - **10 thematic clusters** discovered via KMeans on sentence embeddings:
+We go from raw data all the way to a working API: exploratory analysis, unsupervised clustering, and a FastAPI service that can classify any new prompt into a thematic group.
 
-  | Cluster | Count | Theme |
-  |---------|-------|-------|
-  | 0 | 3,924 | Discord messages/attachments (junk) |
-  | 1 | 9,553 | Epic/historical scenes (warriors, mythology) |
-  | 2 | 10,132 | Animals/creatures (cats, owls, cartoon animals) |
-  | 3 | 12,691 | Cinematic/aesthetic (8K, realism, aspect ratios) |
-  | 4 | 15,700 | Mixed/general (diverse, no clear theme) |
-  | 5 | 8,929 | Women/girls (female characters, portraits) |
-  | 6 | 9,636 | Men/characters (male characters, celebrities) |
-  | 7 | 7,478 | Horror/dark (horror, sci-fi, dark atmosphere) |
-  | 8 | 10,694 | Animation/cartoon (anime, 3D styles) |
-  | 9 | 11,263 | Nature/landscapes (rain, mountains, forests) |
+**Dataset:** [VidProM: A Million-scale Real Prompt-Gallery Dataset for Text-to-Video Diffusion Models](https://arxiv.org/abs/2403.06098) (Wang et al., 2024)
 
-  ## Method
+---
 
-  1. **EDA** — distributions, temporal patterns, NSFW analysis, word frequency (pandas, matplotlib, seaborn)
-  2. **Embeddings** — 100K prompts encoded with `all-MiniLM-L6-v2` (384-dim sentence embeddings)
-  3. **Clustering** — PCA (384 → 50 dims) + KMeans (k=10), visualized via PCA 2D projection
+## Key Findings
 
-  ## Sample Visualizations
+- The typical prompt is just **11 words** long — people describe scenes, not write essays
+- **98% of prompts are clean.** Only 1.89% exceed a toxicity threshold of 0.5
+- Data spans **248 days** (Jun 2023 — Mar 2024), covering the early adoption wave of video AI
+- Unsupervised clustering reveals **10 distinct thematic groups** — from nature landscapes to anime to horror
 
-  | Prompt Length Distribution | Cluster Scatter Plot |
-  |---|---|
-  | ![](data/prompt_length_dist.png) | ![](data/clusters_scatter.png) |
+| Cluster | Theme | Count |
+|---------|-------|-------|
+| 0 | Discord junk (metadata leaking into prompts) | 3,924 |
+| 1 | Epic/historical scenes (warriors, mythology) | 9,553 |
+| 2 | Animals/creatures (cats, owls, cartoon animals) | 10,132 |
+| 3 | Cinematic/aesthetic (8K, realism, aspect ratios) | 12,691 |
+| 4 | Mixed/general (diverse, no clear theme) | 15,700 |
+| 5 | Women/girls (female characters, portraits) | 8,929 |
+| 6 | Men/characters (male characters, celebrities) | 9,636 |
+| 7 | Horror/dark (sci-fi, dark atmosphere) | 7,478 |
+| 8 | Animation/cartoon (anime, 3D styles) | 10,694 |
+| 9 | Nature/landscapes (rain, mountains, forests) | 11,263 |
 
-  ## Notebooks                                                                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                                    
-  The analysis consists of two parts:
+---
 
-  **Exploratory Data Analysis**
-  [1_eda.ipynb](notebooks/1_eda.ipynb) — data overview, distributions, temporal patterns, NSFW analysis, word frequency and bigrams. Produces 10+ visualizations with conclusions.
+## How It Works
 
-  **Clustering**
-  [02_clustering.ipynb](notebooks/02_clustering.ipynb) — sentence embeddings via `all-MiniLM-L6-v2`, dimensionality reduction with PCA, KMeans clustering (k=10), cluster interpretation.
+The project consists of 3 notebooks and an API, each building on the previous one:
 
-  ## Tools & Techniques
+### 1. Exploratory Data Analysis
+Full statistical overview of 1.67M prompts: distributions, temporal patterns, NSFW scores, word frequencies and bigrams. Produces 8+ visualizations with conclusions.
 
-  - **Data processing:** pandas, numpy
-  - **Visualization:** matplotlib, seaborn, wordcloud
-  - **Embeddings:** sentence-transformers (`all-MiniLM-L6-v2`, 384-dim)
-  - **Clustering:** PCA (scikit-learn), KMeans with Elbow method
-  - **Dataset:** HuggingFace `datasets` library
+[01_eda.ipynb](notebooks/01_eda.ipynb)
 
-  ## References
+### 2. Clustering
+100K prompts encoded into 384-dim vectors with `all-MiniLM-L6-v2`, compressed via PCA (384 -> 50 dims), then grouped with KMeans (k=10 chosen via elbow method). Each cluster manually inspected and labeled.
 
-  - **Dataset:** [VidProM: A Million-scale Real Prompt-Gallery Dataset for Text-to-Video Diffusion Models](https://arxiv.org/abs/2403.06098) by Wenhao Wang et al.
-  - **Embeddings model:** [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) by Sentence-Transformers
+[02_clustering.ipynb](notebooks/02_clustering.ipynb)
+
+### 3. Data Preparation
+Pre-computes all statistics and cluster summaries into JSON files so the API can serve them instantly.
+
+[03_prepare_api_data.ipynb](notebooks/03_prepare_api_data.ipynb)
+
+### 4. FastAPI Service
+REST API that serves the analysis results and can classify new prompts in real time.
+
+```
+GET  /stats/overview          — dataset statistics
+GET  /stats/top-words         — most frequent words (with limit param)
+GET  /clusters                — list of 10 thematic clusters
+GET  /clusters/{id}           — cluster details with sample prompts
+POST /analyze                 — classify any prompt into a cluster
+```
+
+---
+
+## Sample Visualizations
+
+| Prompt Length Distribution | Temporal Patterns |
+|---|---|
+| ![](img/prompt_length_dist.png) | ![](img/temporal_patterns.png) |
+
+| NSFW Analysis | Cluster Scatter Plot |
+|---|---|
+| ![](img/nsfw_analysis.png) | ![](img/clusters_scatter.png) |
+
+---
+
+## Quick Start
+
+```bash
+git clone https://github.com/yourusername/vidprom-explorer.git
+cd vidprom-explorer
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Download the dataset:
+```bash
+python scripts/download_data.py
+```
+
+Run the notebooks in order (`01_eda` -> `02_clustering` -> `03_prepare_api_data`), then start the API:
+```bash
+uvicorn app.main:app --reload
+```
+
+Open `http://127.0.0.1:8000/docs` for interactive Swagger documentation.
+
+---
+
+## Project Structure
+
+```
+vidprom-explorer/
+├── notebooks/
+│   ├── 01_eda.ipynb                # Exploratory data analysis
+│   ├── 02_clustering.ipynb         # Embeddings + KMeans clustering
+│   └── 03_prepare_api_data.ipynb   # Pre-compute data for API
+├── app/
+│   ├── main.py                     # FastAPI application
+│   ├── data_loader.py              # Data loading (lifespan)
+│   ├── schemas.py                  # Pydantic response models
+│   └── routers/
+│       ├── stats.py                # /stats/* endpoints
+│       ├── clusters.py             # /clusters/* endpoints
+│       └── analyze.py              # POST /analyze endpoint
+├── scripts/
+│   └── download_data.py
+├── models/                         # Saved PCA + KMeans models
+├── data/                           # Dataset + pre-computed JSONs
+└── requirements.txt
+```
+
+## Tools & Libraries
+
+- **Data:** pandas, numpy
+- **Visualization:** matplotlib, seaborn, wordcloud
+- **NLP:** sentence-transformers ([all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2))
+- **ML:** scikit-learn (PCA, KMeans)
+- **API:** FastAPI, Pydantic, uvicorn
+
+## References
+
+- Wang et al. — [VidProM: A Million-scale Real Prompt-Gallery Dataset for Text-to-Video Diffusion Models](https://arxiv.org/abs/2403.06098) (2024)
+- Reimers & Gurevych — [Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks](https://arxiv.org/abs/1908.10084) (2019)

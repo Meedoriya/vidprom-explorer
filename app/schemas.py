@@ -38,3 +38,14 @@ class ClusterDetail(BaseModel):
     name: str
     count: int
     sample_prompts: list[str]
+
+
+class AnalyzeRequest(BaseModel):
+    prompt: str
+
+
+class AnalyzeResponse(BaseModel):
+    prompt_length: int
+    word_count: int
+    cluster_id: int
+    cluster_name: str
