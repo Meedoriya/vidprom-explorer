@@ -8,3 +8,5 @@ scikit-learn
 jupyter
 h5py
 sentence-transformers
+fastapi
+uvicorn
